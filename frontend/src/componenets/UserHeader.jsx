@@ -25,7 +25,7 @@ import useShowToast from '../hooks/useShowToast.js';
 const UserHeader = ({ user }) => {
   const { colorMode } = useColorMode();
   const currentUser = useRecoilValue(userAtom);
-  const [following, setFollowing] = useState(currentUser && user.followers.includes(currentUser._id));
+  const [following, setFollowing] = useState(currentUser && user.followers.includes(currentUser?._id));
   const showToast = useShowToast();
   const [updating, setUpdating] = useState(false);
   const toast = useToast();
@@ -52,10 +52,10 @@ const UserHeader = ({ user }) => {
       }
       if (following) {
         showToast("Success", `Unfollowed ${user.name}`, "success");
-        user.followers = user.followers.filter(follower => follower !== currentUser._id); // simulate removing from followers
+        user.followers = user.followers.filter(follower => follower !== currentUser?._id); // simulate removing from followers
       } else {
         showToast("Success", `Followed ${user.name}`, "success");
-        user.followers.push(currentUser._id); // simulate adding to followers
+        user.followers.push(currentUser?._id); // simulate adding to followers
       }
       setFollowing(!following);
     } catch (error) {

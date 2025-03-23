@@ -1,133 +1,147 @@
-import { Avatar, Box, Button, Divider, Flex, Image, Spinner, Text } from "@chakra-ui/react";
-import Actions from "../components/Actions";
-import { useEffect } from "react";
-import Comment from "../components/Comment";
-import useGetUserProfile from "../hooks/useGetUserProfile";
-import useShowToast from "../hooks/useShowToast";
-import { useNavigate, useParams } from "react-router-dom";
+import  { useEffect, useState } from 'react';
+import { Avatar, Flex, Text, Image, Box, Divider, Button } from '@chakra-ui/react';
+import Action from '../componenets/Action';
+import useGetUserProfile from '../hooks/useGetUserProfile';
+import useShowToast from '../hooks/useShowToast';
+import { useNavigate, useParams } from 'react-router-dom';
 import { formatDistanceToNow } from "date-fns";
-import { useRecoilState, useRecoilValue } from "recoil";
-import userAtom from "../atoms/userAtom";
+import { useRecoilState, useRecoilValue } from 'recoil';
+import userAtom from '../atoms/userAtom';
 import { DeleteIcon } from "@chakra-ui/icons";
-import postsAtom from "../atoms/postsAtom";
+import Comment from '../componenets/comment';
+import postsAtom from '../atoms/postAtom';
 
 const PostPage = () => {
-	const { user, loading } = useGetUserProfile();
-	const [posts, setPosts] = useRecoilState(postsAtom);
-	const showToast = useShowToast();
-	const { pid } = useParams();
-	const currentUser = useRecoilValue(userAtom);
-	const navigate = useNavigate();
+  const [liked, setLiked] = useState(false);
+  const { user, loading } = useGetUserProfile();
+  const [posts, setPosts] = useRecoilState(postsAtom);
+  const { pid } = useParams();
+  const currentUser = useRecoilValue(userAtom);
+  const showToast = useShowToast();
+  const navigate = useNavigate();
 
-	const currentPost = posts[0];
+  const currentPost = posts.length > 0 ? posts[0] : null;
 
-<<<<<<< HEAD
-	useEffect(() => {
-		const getPost = async () => {
-			setPosts([]);
-			try {
-				const res = await fetch(`/api/posts/${pid}`);
-				const data = await res.json();
-				if (data.error) {
-					showToast("Error", data.error, "error");
-					return;
-				}
-				setPosts([data]);
-			} catch (error) {
-				showToast("Error", error.message, "error");
-			}
-		};
-		getPost();
-	}, [showToast, pid, setPosts]);
-=======
-      <Text my={3}>Let's talk about </Text>
->>>>>>> origin/main
+  useEffect(() => {
+    const getPosts = async () => {
+      try {
+        const res = await fetch(`/api/posts/${pid}`);
+        const data = await res.json();
+        if (data.error) {
+          showToast("Error", data.error, "error");
+          return;
+        }
+        setPosts([data]);
+      } catch (error) {
+        showToast("Error", error.message, "error");
+      }
+    };
+    getPosts();
+  }, [showToast, pid, setPosts]);
 
-	const handleDeletePost = async () => {
-		try {
-			if (!window.confirm("Are you sure you want to delete this post?")) return;
+  const handleDeletePost = async (e) => {
+    try {
+      e.preventDefault();
+      if (!window.confirm("Are you sure you want to delete this post?")) return;
 
-			const res = await fetch(`/api/posts/${currentPost._id}`, {
-				method: "DELETE",
-			});
-			const data = await res.json();
-			if (data.error) {
-				showToast("Error", data.error, "error");
-				return;
-			}
-			showToast("Success", "Post deleted", "success");
-			navigate(`/${user.username}`);
-		} catch (error) {
-			showToast("Error", error.message, "error");
-		}
-	};
+      const res = await fetch(`/api/posts/${currentPost._id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.error) {
+        showToast("Error", data.error, "error");
+        return;
+      }
+      showToast("Success", "Post deleted", "success");
+      navigate(`/${user.username}`);
+    } catch (error) {
+      showToast("Error", error.message, "error");
+    }
+  };
 
-	if (!user && loading) {
-		return (
-			<Flex justifyContent={"center"}>
-				<Spinner size={"xl"} />
-			</Flex>
-		);
-	}
+  const handleDeleteReply = async (replyId) => {
+    if (!user) return showToast("Error", "You must be logged in to delete a reply", "error");
+    try {
+      const res = await fetch(`/api/posts/${currentPost._id}/replies/${replyId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await res.json();
+      if (data.error) return showToast("Error", data.error, "error");
 
-	if (!currentPost) return null;
-	console.log("currentPost", currentPost);
+      const updatedPosts = posts.map((p) => {
+        if (p._id === currentPost._id) {
+          return { ...p, replies: p.replies.filter((r) => r._id !== replyId) };
+        }
+        return p;
+      });
+      setPosts(updatedPosts);
+      showToast("Success", "Reply deleted successfully", "success");
+    } catch (error) {
+      showToast("Error", error.message, "error");
+    }
+  };
 
-	return (
-		<>
-			<Flex>
-				<Flex w={"full"} alignItems={"center"} gap={3}>
-					<Avatar src={user.profilePic} size={"md"} name='Mark Zuckerberg' />
-					<Flex>
-						<Text fontSize={"sm"} fontWeight={"bold"}>
-							{user.username}
-						</Text>
-						<Image src='/verified.png' w='4' h={4} ml={4} />
-					</Flex>
-				</Flex>
-				<Flex gap={4} alignItems={"center"}>
-					<Text fontSize={"xs"} width={36} textAlign={"right"} color={"gray.light"}>
-						{formatDistanceToNow(new Date(currentPost.createdAt))} ago
-					</Text>
+  if (loading || !currentPost || !user) return null;
 
-					{currentUser?._id === user._id && (
-						<DeleteIcon size={20} cursor={"pointer"} onClick={handleDeletePost} />
-					)}
-				</Flex>
-			</Flex>
+  return (
+    <>
+      <Flex justifyContent="space-between" alignItems="center" my={4}>
+        <Flex alignItems="center" gap={2}>
+          <Avatar src={user.profilePic} size="md" name={user.username} />
+          <Flex alignItems="center">
+            <Text fontSize="sm" fontWeight="bold" mr={1}>
+              {user.username}
+            </Text>
+            <Image src="/verified.png" w={4} h={4} />
+          </Flex>
+        </Flex>
+        <Flex justifyContent="space-between" alignItems="center">
+          <Text fontSize="sm" color="gray.light">
+            {formatDistanceToNow(new Date(currentPost.createdAt))} ago
+          </Text>
+          {currentUser?._id === user._id && (
+            <DeleteIcon
+              size={20}
+              onClick={handleDeletePost}
+              style={{ cursor: 'pointer' }}
+            />
+          )}
+        </Flex>
+      </Flex>
 
-			<Text my={3}>{currentPost.text}</Text>
+      <Text my={3}>{currentPost.text}</Text>
 
-			{currentPost.img && (
-				<Box borderRadius={6} overflow={"hidden"} border={"1px solid"} borderColor={"gray.light"}>
-					<Image src={currentPost.img} w={"full"} />
-				</Box>
-			)}
-
-			<Flex gap={3} my={3}>
-				<Actions post={currentPost} />
-			</Flex>
-
-			<Divider my={4} />
-
-			<Flex justifyContent={"space-between"}>
-				<Flex gap={2} alignItems={"center"}>
-					<Text fontSize={"2xl"}>👋</Text>
-					<Text color={"gray.light"}>Get the app to like, reply and post.</Text>
-				</Flex>
-				<Button>Get</Button>
-			</Flex>
-
-			<Divider my={4} />
-			{currentPost.replies.map((reply) => (
-				<Comment
-					key={reply._id}
-					reply={reply}
-					lastReply={reply._id === currentPost.replies[currentPost.replies.length - 1]._id}
-				/>
-			))}
-		</>
-	);
+      {currentPost.img && (
+        <Box borderRadius={6} overflow="hidden" border="1px solid" borderColor="gray.light" my={3}>
+          <Image src={currentPost.img} w="full" />
+        </Box>
+      )}
+      <Flex gap={3} my={3}>
+        <Action post={currentPost} />
+      </Flex>
+      <Divider my={4} />
+      <Flex justifyContent={"space-between"}>
+        <Flex gap={2} alignItems={"center"}>
+          <Text fontSize={"2xl"}></Text>
+          <Text color={"gray.light"}>Get replies and comments</Text>
+        </Flex>
+        
+      </Flex>
+      <Divider my={4} />
+      
+      {currentPost.replies.map((reply) => (
+        <Comment
+          key={reply._id}
+          reply={reply}
+          lastReply={reply._id === currentPost.replies[currentPost.replies.length - 1]._id}
+          handleDeleteReply={handleDeleteReply}
+        />
+      ))}
+    </>
+  );
 };
 
 export default PostPage;

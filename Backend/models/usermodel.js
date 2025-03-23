@@ -18,11 +18,7 @@ const userSchema = mongoose.Schema(
 		},
 		password: {
 			type: String,
-<<<<<<< HEAD
-			minLength: 4,
-=======
 			minLength: 6,
->>>>>>> origin/main
 			required: true,
 		},
 		profilePic: {
@@ -30,10 +26,6 @@ const userSchema = mongoose.Schema(
 			default: "",
 		},
 		followers: {
-<<<<<<< HEAD
-            // array of strings
-=======
->>>>>>> origin/main
 			type: [String],
 			default: [],
 		},
@@ -43,11 +35,7 @@ const userSchema = mongoose.Schema(
 		},
 		bio: {
 			type: String,
-<<<<<<< HEAD
-			default: "Hey! There 👋",
-=======
 			default: "",
->>>>>>> origin/main
 		},
 		isFrozen: {
 			type: Boolean,
@@ -61,8 +49,4 @@ const userSchema = mongoose.Schema(
 
 const User = mongoose.model("User", userSchema);
 
-<<<<<<< HEAD
 export default User;
-=======
-export default User;
->>>>>>> origin/main

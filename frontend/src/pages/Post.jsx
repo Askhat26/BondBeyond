@@ -4,9 +4,13 @@ import { Avatar, Box, Flex, Text, Image } from '@chakra-ui/react';
 import Action from "../componenets/Action"
 import useShowToast from '../hooks/useShowToast';
 import {formatDistanceToNow} from "date-fns";
-
+import { DeleteIcon } from "@chakra-ui/icons";
+import { useRecoilState, useRecoilValue } from 'recoil';
+import userAtom from '../atoms/userAtom';
+import postsAtom from '../atoms/postAtom'
 const Post = ({ post, postedBy }) => {
-  const [liked, setLiked] = useState(false);
+  const [posts, setPosts] =useRecoilState(postsAtom);
+  const currentUser = useRecoilValue(userAtom)
   const [user, setUser] = useState(null);
   const showToast = useShowToast();
   const navigate = useNavigate();
@@ -28,7 +32,25 @@ const Post = ({ post, postedBy }) => {
     };
     getUser();
   }, [postedBy, showToast]);
+  const handleDeletePost = async (e) => {
+		try {
+			e.preventDefault();
+			if (!window.confirm("Are you sure you want to delete this post?")) return;
 
+			const res = await fetch(`/api/posts/${post._id}`, {
+				method: "DELETE",
+			});
+			const data = await res.json();
+			if (data.error) {
+				showToast("Error", data.error, "error");
+				return;
+			}
+			showToast("Success", "Post deleted", "success");
+			setPosts(posts.filter((p) => p._id !== post._id));
+		} catch (error) {
+			showToast("Error", error.message, "error");
+		}
+	};
   if (!user) return null; // Ensure the component does not render until user data is fetched
 
   return (
@@ -96,11 +118,17 @@ const Post = ({ post, postedBy }) => {
             </Text>
             <Image src="/verified.png" w={4} h={4} ml={1} />
           </Flex>
-          <Flex gap={4} alignItems="center">
-            <Text fontSize="sm"  textAlign={"right"} color="gray.light">
+          <Flex justifyContent="space-between" alignItems="center">
+            <Text fontSize="sm" color="gray.light">
               {formatDistanceToNow(new Date(post.createdAt))} ago
             </Text>
-            
+            {currentUser?._id === user._id && (
+              <DeleteIcon
+                size={20}
+                onClick={handleDeletePost}
+                style={{ cursor: 'pointer' }}
+              />
+            )}
           </Flex>
           <Text fontSize="sm">{post.text}</Text>
           {post.img && (

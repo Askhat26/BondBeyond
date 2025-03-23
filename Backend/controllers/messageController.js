@@ -1,5 +1,7 @@
 import Conversation from "../models/conversationModel.js";
 import Message from "../models/messageModel.js";
+import { v2 as cloudinary } from "cloudinary";
+import { getRecipientSocketId,io } from "../socket/socket.js";
 
 
 async function sendMessage(req, res) {
@@ -48,6 +50,7 @@ async function sendMessage(req, res) {
 		const recipientSocketId = getRecipientSocketId(recipientId);
 		if (recipientSocketId) {
 			io.to(recipientSocketId).emit("newMessage", newMessage);
+			// io.to ---> is used to send a message to all clients in a specific room.
 		}
 
 		res.status(201).json(newMessage);

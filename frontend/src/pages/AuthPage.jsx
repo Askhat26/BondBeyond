@@ -1,15 +1,17 @@
-import { useRecoilValue } from "recoil";
-import LoginCard from "../components/LoginCard";
-import SignupCard from "../components/Signup";
-import authScreenAtom from "../atoms/authAtom";
-const AuthPage=() =>{
-    const authScreenState= useRecoilValue(authScreenAtom);
-    console.log(authScreenState);
-    return(
-        <>
-            {authScreenState === "login" ? <LoginCard/> : <SignupCard/>}
-        </>
-    )
-};
+import React from 'react'
+import LoginPage from './LoginPage'
 
-export default AuthPage;
+import SignupPage from './SignupPage'
+import { useRecoilValue } from 'recoil'
+import authScreenAtom from '../atoms/authAtom'
+const AuthPage = () => {
+  const authScreenState =useRecoilValue(authScreenAtom);
+  console.log(authScreenState);
+  return (
+    <>
+      {authScreenState === "login" ? <LoginPage /> : <SignupPage />}
+    </>
+  )
+}
+
+export default AuthPage

@@ -1,65 +1,53 @@
-import { Box, Container, Button } from "@chakra-ui/react";
-import {Navigate,Route, Routes} from 'react-router-dom'
+import { Box } from "@chakra-ui/react"
+import { Container } from "@chakra-ui/react"
+import { Navigate, Route, Routes, useLocation } from "react-router-dom"
 import UserPage from "./pages/UserPage"
- import PostPage from "./pages/PostPage"
-import AuthPage from "./pages/AuthPage"
+import PostPage from "./pages/PostPage"
+import Header from "./componenets/Header"
 import HomePage from "./pages/HomePage"
-<<<<<<< HEAD
-import UpdateProfilePage from "./pages/UpdateProfilePage"
-import Headers from './components/Headers';
-import LogoutButton from "./components/LogoutButton";
-import CreatePost from "./components/CreatePost"
-import userAtom from "./atoms/userAtom";
-import { useRecoilValue } from "recoil";
-=======
 import AuthPage from "./pages/AuthPage";
-
 import { useRecoilValue } from "recoil"
 import userAtom from "./atoms/userAtom"
 import LogoutButton from "./pages/LogoutButton"
 import UpdateProfilePage from "./pages/UpdateProfilePage"
 import CreatePost from "./componenets/CreatePost"
+import ChatPage from "./pages/ChatPage"
 
->>>>>>> origin/main
 function App() {
-const user = useRecoilValue(userAtom);
-
+  const user = useRecoilValue(userAtom)
+  const { pathname } = useLocation();
   return (
-<<<<<<< HEAD
-    <Box position={"relative"} w='full'> 
-    <Container maxWidth='700px'>
-      <Headers/>
-      <Routes>
-        <Route path='/' element={user ? <HomePage/> : <Navigate to='/auth'/>}/>
-        <Route path="/auth" element={!user ? <AuthPage/> : <Navigate to='/'/>}/>
-        <Route path="/update" element={user ? <UpdateProfilePage/> : <Navigate to='/auth'/>}/>
+    <Box position={"relative"} w="full">
+      <Container maxW={pathname === "/" ? { base: "620px", md: "900px" } : "620px"}>
+        <Box display="flex">
 
-        <Route path="/:username" element={<UserPage/>}/>
-        <Route path="/:username/post/:pid" element={<PostPage/>}/>
-        {/* <Route path="/chat" element={user ? <ChatPage/> : <Navigate to={"/auth"}/> }/> */}
-      </Routes>
-      {user && <LogoutButton/>}
-=======
-    <Container maxW="620px">
-      <Box display="flex">
-         
-        <Box flex="1" ml="4">
-          <Header />
-          <Routes>
-            <Route path="/" element={ user ? <HomePage/> : <Navigate to="/auth"></Navigate>}/>
-            <Route path="/auth//*" element={ !user ? <AuthPage/> : <Navigate to="/"></Navigate>}/>
-            <Route path="/update" element={ user ? <UpdateProfilePage/> : <Navigate to='/auth'/> }></Route> 
-            <Route path="/:username" element={<UserPage />} />
-            <Route path="/:username/post/:pid" element={<PostPage />} />
-          </Routes>
+          <Box flex="1" ml="4">
+            <Header />
+            <Routes>
+              <Route path="/" element={user ? <HomePage /> : <Navigate to="/auth"></Navigate>} />
+              <Route path="/auth//*" element={!user ? <AuthPage /> : <Navigate to="/"></Navigate>} />
+              <Route path="/update" element={user ? <UpdateProfilePage /> : <Navigate to='/auth' />}></Route>
+              <Route path="/:username" element={user ?
+                (
+                  <>
+                    <UserPage />
+                    <CreatePost />
+                  </>
+                ) : (
+                  <UserPage />
+                )} />
+              <Route path="/:username/post/:pid" element={<PostPage />} />
+              <Route path='/chat' element={user ? <ChatPage /> : <Navigate to={"/auth"} />} />
+            </Routes>
+          </Box>
         </Box>
-      </Box>
-      { user && <LogoutButton/>}
->>>>>>> origin/main
-      {user && <CreatePost/>}
-    </Container>
+        {user && <LogoutButton />}
+
+      </Container>
     </Box>
-  )
+  );
 }
 
 export default App;
+
+

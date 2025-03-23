@@ -19,8 +19,9 @@ import { useSetRecoilState } from "recoil";
 import authScreenAtom from "../atoms/authAtom";
 import useShowToast from "../hooks/useShowToast";
 import userAtom from "../atoms/userAtom";
+// import GoogleSignInButton from "../googleauth/GoogleSignInButton.jsx";
 
-export default function LoginCard() {
+const LoginPage = () => {
 	const [showPassword, setShowPassword] = useState(false);
 	const setAuthScreen = useSetRecoilState(authScreenAtom);
 	const setUser = useSetRecoilState(userAtom);
@@ -31,6 +32,7 @@ export default function LoginCard() {
 		password: "",
 	});
 	const showToast = useShowToast();
+
 	const handleLogin = async () => {
 		setLoading(true);
 		try {
@@ -49,11 +51,12 @@ export default function LoginCard() {
 			localStorage.setItem("user-threads", JSON.stringify(data));
 			setUser(data);
 		} catch (error) {
-			showToast("Error", error, "error");
+			showToast("Error", error.message, "error");
 		} finally {
 			setLoading(false);
 		}
 	};
+
 	return (
 		<Flex align={"center"} justify={"center"}>
 			<Stack spacing={8} mx={"auto"} maxW={"lg"} py={12} px={6}>
@@ -64,21 +67,20 @@ export default function LoginCard() {
 				</Stack>
 				<Box
 					rounded={"lg"}
-					bg={useColorModeValue("white", "gray.dark")}
+					bg={useColorModeValue("white", "gray.700")}
 					boxShadow={"lg"}
 					p={8}
-					w={{
-						base: "full",
-						sm: "400px",
-					}}
+					w={{ base: "full", sm: "400px" }}
 				>
 					<Stack spacing={4}>
 						<FormControl isRequired>
 							<FormLabel>Username</FormLabel>
 							<Input
-								type='text'
+								type="text"
 								value={inputs.username}
-								onChange={(e) => setInputs((inputs) => ({ ...inputs, username: e.target.value }))}
+								onChange={(e) =>
+									setInputs((inputs) => ({ ...inputs, username: e.target.value }))
+								}
 							/>
 						</FormControl>
 						<FormControl isRequired>
@@ -87,7 +89,9 @@ export default function LoginCard() {
 								<Input
 									type={showPassword ? "text" : "password"}
 									value={inputs.password}
-									onChange={(e) => setInputs((inputs) => ({ ...inputs, password: e.target.value }))}
+									onChange={(e) =>
+										setInputs((inputs) => ({ ...inputs, password: e.target.value }))
+									}
 								/>
 								<InputRightElement h={"full"}>
 									<Button
@@ -101,8 +105,8 @@ export default function LoginCard() {
 						</FormControl>
 						<Stack spacing={10} pt={2}>
 							<Button
-								loadingText='Logging in'
-								size='lg'
+								loadingText="Logging in"
+								size="lg"
 								bg={useColorModeValue("gray.600", "gray.700")}
 								color={"white"}
 								_hover={{
@@ -113,6 +117,7 @@ export default function LoginCard() {
 							>
 								Login
 							</Button>
+							
 						</Stack>
 						<Stack pt={6}>
 							<Text align={"center"}>
@@ -127,4 +132,6 @@ export default function LoginCard() {
 			</Stack>
 		</Flex>
 	);
-}
+};
+
+export default LoginPage;

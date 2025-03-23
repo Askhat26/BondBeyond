@@ -1,12 +1,7 @@
 import Post from "../models/postModel.js";
 import User from "../models/userModel.js";
-<<<<<<< HEAD
- import { v2 as cloudinary } from "cloudinary";
-
-=======
 
 import { v2 as cloudinary } from 'cloudinary';
->>>>>>> origin/main
 const createPost = async (req, res) => {
 	try {
 		const { postedBy, text } = req.body;
@@ -172,9 +167,35 @@ const getUserPosts = async (req, res) => {
 		res.status(500).json({ error: error.message });
 	}
 };
+const deleteReply = async (req, res) => {
+	try {
+		const postId = req.params.postId;
+		const replyId = req.params.replyId;
+		const userId = req.user._id;
 
-<<<<<<< HEAD
-export { createPost, getPost, deletePost, likeUnlikePost, replyToPost, getFeedPosts, getUserPosts };
-=======
-export { createPost, getPost, deletePost, likeUnlikePost, replyToPost, getFeedPosts, getUserPosts };
->>>>>>> origin/main
+		const post = await Post.findById(postId);
+		if (!post) {
+			return res.status(404).json({ error: "Post not found" });
+		}
+
+		const replyIndex = post.replies.findIndex(reply => reply._id.toString() === replyId);
+
+		if (replyIndex === -1) {
+			return res.status(404).json({ error: "Reply not found" });
+		}
+
+		// Check if the reply belongs to the user
+		if (post.replies[replyIndex].userId.toString() !== userId.toString()) {
+			return res.status(403).json({ error: "Unauthorized action" });
+		}
+
+		post.replies.splice(replyIndex, 1);
+		await post.save();
+
+		res.status(200).json({ message: "Reply deleted successfully" });
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+};
+
+export { createPost, getPost, deletePost, likeUnlikePost, replyToPost, getFeedPosts, getUserPosts,deleteReply };
